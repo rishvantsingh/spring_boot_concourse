@@ -1,10 +1,23 @@
 ---
+resource_types:
+
+- name: slack-alert
+  type: docker-image
+  source:
+    repository: arbourd/concourse-slack-alert-resource
+
 resources:
     - name: source-code
       type: git
       source: 
          uri: https://github.com/rishvantsingh/spring_boot_concourse.git
          branch: master
+
+    - name: notify
+      type: slack-alert
+      source:
+         url: https://hooks.slack.com/services/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
+
 jobs:
     - name: clean-test
       plan:
@@ -17,33 +30,41 @@ jobs:
                    type: docker-image
                    source:
                       repository: maven
+                      tag: 3.6.0-jdk-8-alpine
               inputs: 
                  - name: source-code
               run:
                    path: source-code/ci/script.sh
+
     -  name: package
        plan: 
              - get: source-code
                passed: [clean-test]
                trigger: true
              - task: package
-               file: source-code/ci/task-package.yml
-
-             - task: find-all
                config:
                   platform: linux
                   image_resource:
-                     type: docker-image
-                     source: {repository: openjdk}
-                    
-                  inputs:
-                      - name: target
+                    type: docker-image
+                    source: 
+                        repository: maven
+                        tag: 3.6.0-jdk-8-alpine
 
-                  run:
-                    path: java
-                    args:
-                      - -jar
-                      -  target/hello-0.0.1-SNAPSHOT.jar
+
+                  inputs: 
+                      - name: source-code
+
+                  outputs:
+                      - name: target
+                        path: source-code/target
+                  run: 
+                        path: source-code/ci/task-script.sh
+      
+             
+               ensure: 
+                   put: notify
+                   params: 
+                     message: success
 
 
 
