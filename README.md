@@ -5,7 +5,7 @@ This is a simple "Hello World!" web app using the Spring Boot java framework:
 
 This README file will provide instructions for building and running the service locally. 
 
-This project is set up to use maven to build the jar executable ([maven](https://maven.apache.org/install.html)). 
+This project is there up to use maven to build the jar executable ([maven](https://maven.apache.org/install.html)). 
 
 
 ## Building and running locally
